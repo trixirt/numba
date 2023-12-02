@@ -372,7 +372,8 @@ install_requires = [
 metadata = dict(
     name='numba',
     description="compiling Python code using LLVM",
-    version=versioneer.get_version(),
+    # version=versioneer.get_version(),
+    version="0.59.0",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
