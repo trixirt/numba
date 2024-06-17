@@ -499,6 +499,11 @@ class _EnvReloader(object):
         CUDA_INCLUDE_PATH = _readenv("NUMBA_CUDA_INCLUDE_PATH", str,
                                      default_cuda_include_path)
 
+        # HSA Configs
+
+        # Disable HSA support
+        DISABLE_HSA = _readenv("NUMBA_DISABLE_HSA", int, 0)
+
         # Threading settings
 
         # The default number of threads to use.
