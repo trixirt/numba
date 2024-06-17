@@ -41,10 +41,7 @@ DEFAULT_HSA_DRIVER = '/opt/rocm/lib/libhsa-runtime64.so'
 
 
 def _find_driver():
-    envpath = os.environ.get('NUMBA_HSA_DRIVER', DEFAULT_HSA_DRIVER)
-    if envpath == '0':
-        # Force fail
-        _raise_driver_not_found()
+    envpath = os.environ.get('NUMBA_HSA_DRIVER')
 
     # Determine DLL type
     if (struct.calcsize('P') != 8
