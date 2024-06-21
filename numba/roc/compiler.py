@@ -19,10 +19,10 @@ from numba.core.compiler_lock import global_compiler_lock
 @global_compiler_lock
 def compile_hsa(pyfunc, return_type, args, debug):
     # First compilation will trigger the initialization of the HSA backend.
-    from .descriptor import hsa_target
+    from .descriptor import HSATarget
 
-    typingctx = hsa_target.typingctx
-    targetctx = hsa_target.targetctx
+    typingctx = HSATarget.typingctx
+    targetctx = HSATarget.targetctx
     # TODO handle debug flag
     flags = compiler.Flags()
     # Do not compile (generate native code), just lower (to LLVM)
@@ -76,7 +76,7 @@ def compile_device(pyfunc, return_type, args, debug=False):
 def compile_device_template(pyfunc):
     """Compile a DeviceFunctionTemplate
     """
-    from .descriptor import hsa_target
+    from .descriptor import HSATarget
 
     dft = DeviceFunctionTemplate(pyfunc)
 
@@ -87,7 +87,7 @@ def compile_device_template(pyfunc):
             assert not kws
             return dft.compile(args)
 
-    typingctx = hsa_target.typingctx
+    typingctx = HSATarget.typingctx
     typingctx.insert_user_function(dft, device_function_template)
     return dft
 
@@ -444,9 +444,9 @@ class AutoJitHSAKernel(HSAKernelBase):
         self.py_func = func
         self.definitions = {}
 
-        from .descriptor import hsa_target
+        from .descriptor import HSATarget
 
-        self.typingctx = hsa_target.typingctx
+        self.typingctx = HSATarget.typingctx
 
     def __call__(self, *args):
         kernel = self.specialize(*args)
