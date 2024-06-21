@@ -4,7 +4,7 @@ from llvmlite import ir
 from llvmlite import binding as ll
 
 from numba.core import typing, types, utils, datamodel, cgutils
-from numba.core.utils import cached_property
+from functools import cached_property
 from numba.core.base import BaseContext
 from numba.core.callconv import MinimalCallConv
 from numba.roc import codegen
