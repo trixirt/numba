@@ -1,8 +1,6 @@
 import operator
 from functools import reduce
 
-from llvmlite.llvmpy.core import Type
-import llvmlite.llvmpy.core as lc
 import llvmlite.binding as ll
 from llvmlite import ir
 
@@ -19,7 +17,7 @@ from numba.roc import enums
 registry = Registry()
 lower = registry.lower
 
-_void_value = lc.Constant.null(lc.Type.pointer(lc.Type.int(8)))
+_void_value = ir.Constant(ir.PointerType(ir.IntType(8)), None)
 
 # -----------------------------------------------------------------------------
 
@@ -50,11 +48,11 @@ def _declare_function(context, builder, name, sig, cargs,
     """
     mod = builder.module
     if sig.return_type == types.void:
-        llretty = lc.Type.void()
+        llretty = ir.VoidType()
     else:
         llretty = context.get_value_type(sig.return_type)
     llargs = [context.get_value_type(t) for t in sig.args]
-    fnty = Type.function(llretty, llargs)
+    fnty = ir.FunctionType(llretty, llargs)
     mangled = mangler(name, cargs)
     fn = mod.get_or_insert_function(fnty, mangled)
     fn.calling_convention = target.CC_SPIR_FUNC
@@ -154,7 +152,7 @@ def mem_fence_impl(context, builder, sig, args):
 @lower(stubs.wavebarrier)
 def wavebarrier_impl(context, builder, sig, args):
     assert not args
-    fnty = Type.function(Type.void(), [])
+    fnty = ir.FunctionType(ir.VoidType(), [])
     fn = builder.module.declare_intrinsic('llvm.amdgcn.wave.barrier', fnty=fnty)
     builder.call(fn, [])
     return _void_value
@@ -166,12 +164,12 @@ def activelanepermute_wavewidth_impl(context, builder, sig, args):
     assert sig.args[0] == sig.args[2]
     elem_type = sig.args[0]
     bitwidth = elem_type.bitwidth
-    intbitwidth = Type.int(bitwidth)
-    i32 = Type.int(32)
-    i1 = Type.int(1)
+    intbitwidth = ir.IntType(bitwidth)
+    i32 = ir.IntType(32)
+    i1 = ir.IntType(1)
     name = "__hsail_activelanepermute_wavewidth_b{0}".format(bitwidth)
 
-    fnty = Type.function(intbitwidth, [intbitwidth, i32, intbitwidth, i1])
+    fnty = ir.FunctionType(intbitwidth, [intbitwidth, i32, intbitwidth, i1])
     fn = builder.module.get_or_insert_function(fnty, name=name)
     fn.calling_convention = target.CC_SPIR_FUNC
 
@@ -188,14 +186,14 @@ def _gen_ds_permute(intrinsic_name):
         """
         assert sig.return_type == sig.args[1]
         idx, src = args
-        i32 = Type.int(32)
-        fnty = Type.function(i32, [i32, i32])
+        i32 = ir.IntType(32)
+        fnty = ir.FunctionType(i32, [i32, i32])
         fn = builder.module.declare_intrinsic(intrinsic_name, fnty=fnty)
         # the args are byte addressable, VGPRs are 4 wide so mul idx by 4
         # the idx might be an int64, this is ok to trunc to int32 as
         # wavefront_size is never likely overflow an int32
         idx = builder.trunc(idx, i32)
-        four = lc.Constant.int(i32, 4)
+        four = ir.Constant.int(i32, 4)
         idx = builder.mul(idx, four)
         # bit cast is so float32 works as packed i32, the return casts back
         result = builder.call(fn, (idx, builder.bitcast(src, i32)))
@@ -258,7 +256,7 @@ def hsail_smem_alloc_array_tuple(context, builder, sig, args):
 def _generic_array(context, builder, shape, dtype, symbol_name, addrspace):
     elemcount = reduce(operator.mul, shape, 1)
     lldtype = context.get_data_type(dtype)
-    laryty = Type.array(lldtype, elemcount)
+    laryty = ir.ArrayType(lldtype, elemcount)
 
     if addrspace == target.SPIR_LOCAL_ADDRSPACE:
         lmod = builder.module
@@ -269,7 +267,7 @@ def _generic_array(context, builder, shape, dtype, symbol_name, addrspace):
         if elemcount <= 0:
             raise ValueError("array length <= 0")
         else:
-            gvmem.linkage = lc.LINKAGE_INTERNAL
+            gvmem.linkage = 'internal'
 
         if dtype not in types.number_domain:
             raise TypeError("unsupported type: %s" % dtype)

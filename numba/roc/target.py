@@ -1,7 +1,6 @@
 import re
 
-from llvmlite.llvmpy import core as lc
-from llvmlite import ir as llvmir
+from llvmlite import ir
 from llvmlite import binding as ll
 
 from numba.core import typing, types, utils, datamodel, cgutils
@@ -119,7 +118,7 @@ class HSATargetContext(BaseContext):
         arginfo = self.get_arg_packer(argtypes)
 
         def sub_gen_with_global(lty):
-            if isinstance(lty, llvmir.PointerType):
+            if isinstance(lty, ir.PointerType):
                 return (lty.pointee.as_pointer(SPIR_GLOBAL_ADDRSPACE),
                         lty.addrspace)
             return lty, None
@@ -129,22 +128,22 @@ class HSATargetContext(BaseContext):
                                          arginfo.argument_types))
         else:
             llargtys = changed = ()
-        wrapperfnty = lc.Type.function(lc.Type.void(), llargtys)
+        wrapperfnty = ir.FunctionType(ir.VoidType(), llargtys)
 
         wrapper_module = self.create_module("hsa.kernel.wrapper")
         wrappername = 'hsaPy_{name}'.format(name=func.name)
 
         argtys = list(arginfo.argument_types)
-        fnty = lc.Type.function(lc.Type.int(),
-                                [self.call_conv.get_return_type(
-                                    types.pyobject)] + argtys)
+        fnty = ir.FunctionType(ir.IntType(),
+                               [self.call_conv.get_return_type(
+                                   types.pyobject)] + argtys)
 
         func = wrapper_module.add_function(fnty, name=func.name)
         func.calling_convention = CC_SPIR_FUNC
 
         wrapper = wrapper_module.add_function(wrapperfnty, name=wrappername)
 
-        builder = lc.Builder(wrapper.append_basic_block(''))
+        builder = ir.IRBuilder(wrapper.append_basic_block(''))
 
         # Adjust address space of each kernel argument
         fixed_args = []
@@ -193,7 +192,7 @@ class HSATargetContext(BaseContext):
         """
         Handle addrspacecast
         """
-        ptras = llvmir.PointerType(src.type.pointee, addrspace=addrspace)
+        ptras = ir.PointerType(src.type.pointee, addrspace=addrspace)
         return builder.addrspacecast(src, ptras)
 
 
@@ -213,7 +212,7 @@ def set_hsa_kernel(fn):
 
     # Mark kernels
     ocl_kernels = mod.get_or_insert_named_metadata("opencl.kernels")
-    ocl_kernels.add(lc.MetaData.get(mod, [fn,
+    ocl_kernels.add(mod.add_metadata([fn,
                                           gen_arg_addrspace_md(fn),
                                           gen_arg_access_qual_md(fn),
                                           gen_arg_type(fn),
@@ -221,20 +220,20 @@ def set_hsa_kernel(fn):
                                           gen_arg_base_type(fn)]))
 
     # SPIR version 2.0
-    make_constant = lambda x: lc.Constant.int(lc.Type.int(), x)
+    make_constant = lambda x: ir.Constant.int(ir.IntType(), x)
     spir_version_constant = [make_constant(x) for x in SPIR_VERSION]
 
     spir_version = mod.get_or_insert_named_metadata("opencl.spir.version")
     if not spir_version.operands:
-        spir_version.add(lc.MetaData.get(mod, spir_version_constant))
+        spir_version.add(mod.add_metadata(spir_version_constant))
 
     ocl_version = mod.get_or_insert_named_metadata("opencl.ocl.version")
     if not ocl_version.operands:
-        ocl_version.add(lc.MetaData.get(mod, spir_version_constant))
+        ocl_version.add(mod.add_metadata(spir_version_constant))
 
         ## The following metadata does not seem to be necessary
         # Other metadata
-        # empty_md = lc.MetaData.get(mod, ())
+        # empty_md = mod.add_metadata(())
         # others = ["opencl.used.extensions",
         #           "opencl.used.optional.core.features",
         #           "opencl.compiler.options"]cat
@@ -259,9 +258,9 @@ def gen_arg_addrspace_md(fn):
         else:
             codes.append(SPIR_PRIVATE_ADDRSPACE)
 
-    consts = [lc.Constant.int(lc.Type.int(), x) for x in codes]
-    name = lc.MetaDataString.get(mod, "kernel_arg_addr_space")
-    return lc.MetaData.get(mod, [name] + consts)
+    consts = [ir.Constant.int(ir.IntType(), x) for x in codes]
+    name = ir.MetaDataString.get(mod, "kernel_arg_addr_space")
+    return mod.add_metadata([name] + consts)
 
 
 def gen_arg_access_qual_md(fn):
@@ -269,9 +268,9 @@ def gen_arg_access_qual_md(fn):
     Generate kernel_arg_access_qual metadata
     """
     mod = fn.module
-    consts = [lc.MetaDataString.get(mod, "none")] * len(fn.args)
-    name = lc.MetaDataString.get(mod, "kernel_arg_access_qual")
-    return lc.MetaData.get(mod, [name] + consts)
+    consts = [ir.MetaDataString.get(mod, "none")] * len(fn.args)
+    name = ir.MetaDataString.get(mod, "kernel_arg_access_qual")
+    return mod.add_metadata([name] + consts)
 
 
 def gen_arg_type(fn):
@@ -280,9 +279,9 @@ def gen_arg_type(fn):
     """
     mod = fn.module
     fnty = fn.type.pointee
-    consts = [lc.MetaDataString.get(mod, str(a)) for a in fnty.args]
-    name = lc.MetaDataString.get(mod, "kernel_arg_type")
-    return lc.MetaData.get(mod, [name] + consts)
+    consts = [ir.MetaDataString.get(mod, str(a)) for a in fnty.args]
+    name = ir.MetaDataString.get(mod, "kernel_arg_type")
+    return mod.add_metadata([name] + consts)
 
 
 def gen_arg_type_qual(fn):
@@ -291,9 +290,9 @@ def gen_arg_type_qual(fn):
     """
     mod = fn.module
     fnty = fn.type.pointee
-    consts = [lc.MetaDataString.get(mod, "") for _ in fnty.args]
-    name = lc.MetaDataString.get(mod, "kernel_arg_type_qual")
-    return lc.MetaData.get(mod, [name] + consts)
+    consts = [ir.MetaDataString.get(mod, "") for _ in fnty.args]
+    name = ir.MetaDataString.get(mod, "kernel_arg_type_qual")
+    return mod.add_metadata([name] + consts)
 
 
 def gen_arg_base_type(fn):
@@ -302,9 +301,9 @@ def gen_arg_base_type(fn):
     """
     mod = fn.module
     fnty = fn.type.pointee
-    consts = [lc.MetaDataString.get(mod, str(a)) for a in fnty.args]
-    name = lc.MetaDataString.get(mod, "kernel_arg_base_type")
-    return lc.MetaData.get(mod, [name] + consts)
+    consts = [ir.MetaDataString.get(mod, str(a)) for a in fnty.args]
+    name = ir.MetaDataString.get(mod, "kernel_arg_base_type")
+    return mod.add_metadata([name] + consts)
 
 
 class HSACallConv(MinimalCallConv):
