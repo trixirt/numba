@@ -64,6 +64,9 @@ class HSATargetContext(BaseContext):
     implement_powi_as_math_call = True
     generic_addrspace = SPIR_GENERIC_ADDRSPACE
 
+    def __init__(self, typingctx, target='hsa'):
+        super().__init__(typingctx, target)
+
     def init(self):
         self._internal_codegen = codegen.JITHSACodegen("numba.hsa.jit")
         self._target_data = \
