@@ -1,7 +1,7 @@
 from llvmlite import binding as ll
 from llvmlite import ir
 from numba.core import utils
-from numba.core.codegen import BaseCPUCodegen, CodeLibrary
+from numba.core.codegen import Codegen, CodeLibrary
 from .hlc import DATALAYOUT, TRIPLE, hlc
 
 
@@ -25,7 +25,7 @@ class HSACodeLibrary(CodeLibrary):
         return str(out.hsail)
 
 
-class JITHSACodegen(BaseCPUCodegen):
+class JITHSACodegen(Codegen):
     _library_class = HSACodeLibrary
 
     def _init(self, llvm_module):
