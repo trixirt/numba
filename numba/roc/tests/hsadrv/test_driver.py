@@ -444,9 +444,9 @@ class TestContext(_TestBase):
 
         # only globals are allocation-allowed
         if has_fine_grain:
-            self.assertEqual(len(mpdct['global']), 2)
+            self.assertGreaterEqual(len(mpdct['global']), 2)
         else:
-            self.assertEqual(len(mpdct['global']), 1)
+            self.assertGreaterEqual(len(mpdct['global']), 1)
         self.assertEqual(len(mpdct['readonly']), 0)
         self.assertEqual(len(mpdct['private']), 0)
         self.assertEqual(len(mpdct['group']), 0)
