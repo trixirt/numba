@@ -405,6 +405,8 @@ class Agent(HsaWrapper):
         'fbarrier_max_size': (
             enums.HSA_AGENT_INFO_FBARRIER_MAX_SIZE, ctypes.c_uint32),
         'queues_max': (enums.HSA_AGENT_INFO_QUEUES_MAX, ctypes.c_uint32),
+        'queue_min_size': (
+            enums.HSA_AGENT_INFO_QUEUE_MIN_SIZE, ctypes.c_uint32),
         'queue_max_size': (
             enums.HSA_AGENT_INFO_QUEUE_MAX_SIZE, ctypes.c_uint32),
         'queue_type': (

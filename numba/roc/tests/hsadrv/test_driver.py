@@ -46,13 +46,13 @@ class TestAgents(unittest.TestCase):
     def test_agents_create_queue_single(self):
         for agent in roc.agents:
             if agent.is_component:
-                queue = agent.create_queue_single(2 ** 5)
+                queue = agent.create_queue_single(agent.queue_min_size)
                 self.assertIsInstance(queue, Queue)
 
     def test_agents_create_queue_multi(self):
         for agent in roc.agents:
             if agent.is_component:
-                queue = agent.create_queue_multi(2 ** 5)
+                queue = agent.create_queue_multi(agent.queue_min_size)
                 self.assertIsInstance(queue, Queue)
 
     def test_agent_wavebits(self):
