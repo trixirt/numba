@@ -54,7 +54,7 @@ def _declare_function(context, builder, name, sig, cargs,
     llargs = [context.get_value_type(t) for t in sig.args]
     fnty = ir.FunctionType(llretty, llargs)
     mangled = mangler(name, cargs)
-    fn = mod.get_or_insert_function(fnty, mangled)
+    fn = cgutils.get_or_insert_function(mod, fnty, mangled)
     fn.calling_convention = target.CC_SPIR_FUNC
     return fn
 
@@ -170,7 +170,8 @@ def activelanepermute_wavewidth_impl(context, builder, sig, args):
     name = "__hsail_activelanepermute_wavewidth_b{0}".format(bitwidth)
 
     fnty = ir.FunctionType(intbitwidth, [intbitwidth, i32, intbitwidth, i1])
-    fn = builder.module.get_or_insert_function(fnty, name=name)
+    lmod = builder.module
+    fn = cgutils.get_or_insert_function(lmod, fnty, name=name)
     fn.calling_convention = target.CC_SPIR_FUNC
 
     def cast(val):

@@ -211,7 +211,7 @@ def set_hsa_kernel(fn):
     fn.calling_convention = CC_SPIR_KERNEL
 
     # Mark kernels
-    ocl_kernels = mod.get_or_insert_named_metadata("opencl.kernels")
+    ocl_kernels = cgutils.get_or_insert_named_metadata(mod, "opencl.kernels")
     ocl_kernels.add(mod.add_metadata([fn,
                                           gen_arg_addrspace_md(fn),
                                           gen_arg_access_qual_md(fn),
@@ -223,11 +223,11 @@ def set_hsa_kernel(fn):
     make_constant = lambda x: ir.Constant.int(ir.IntType(), x)
     spir_version_constant = [make_constant(x) for x in SPIR_VERSION]
 
-    spir_version = mod.get_or_insert_named_metadata("opencl.spir.version")
+    spir_version = cgutils.get_or_insert_named_metadata(mod, "opencl.spir.version")
     if not spir_version.operands:
         spir_version.add(mod.add_metadata(spir_version_constant))
 
-    ocl_version = mod.get_or_insert_named_metadata("opencl.ocl.version")
+    ocl_version = cgutils.get_or_insert_named_metadata(mod, "opencl.ocl.version")
     if not ocl_version.operands:
         ocl_version.add(mod.add_metadata(spir_version_constant))
 
