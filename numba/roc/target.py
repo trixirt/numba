@@ -68,7 +68,7 @@ class HSATargetContext(BaseContext):
         super().__init__(typingctx, target)
 
     def init(self):
-        self._internal_codegen = codegen.JITHSACodegen("numba.hsa.jit")
+        self._internal_codegen = codegen.JITHSACodegen()
         self._target_data = \
             ll.create_target_data(DATALAYOUT[utils.MACHINE_BITS])
         # Override data model manager

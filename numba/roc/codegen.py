@@ -28,8 +28,7 @@ class HSACodeLibrary(CodeLibrary):
 class JITHSACodegen(Codegen):
     _library_class = HSACodeLibrary
 
-    def _init(self, llvm_module):
-        assert list(llvm_module.global_variables) == [], "Module isn't empty"
+    def _init(self):
         self._data_layout = DATALAYOUT[utils.MACHINE_BITS]
         self._target_data = ll.create_target_data(self._data_layout)
 
