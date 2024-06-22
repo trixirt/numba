@@ -87,6 +87,9 @@ class HSATargetContext(BaseContext):
     def codegen(self):
         return self._internal_codegen
 
+    def create_module(self, name):
+        return self._internal_codegen._create_empty_module(name)
+
     @property
     def target_data(self):
         return self._target_data
