@@ -10,6 +10,5 @@ class HSATarget(TargetDescriptor):
     options = HSATargetOptions
     typingctx = HSATypingContext()
     targetctx = HSATargetContext(typingctx)
-    super().__init__('hsa')
 
 
