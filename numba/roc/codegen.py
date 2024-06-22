@@ -6,6 +6,11 @@ from .hlc import DATALAYOUT, TRIPLE, hlc
 
 
 class HSACodeLibrary(CodeLibrary):
+    def __init__(self, codegen, name):
+        super().__init__(codegen, name)
+        # The llvmlite module for this library.
+        self._module = None
+
     def _optimize_functions(self, ll_module):
         pass
 
@@ -13,6 +18,16 @@ class HSACodeLibrary(CodeLibrary):
         pass
 
     def _finalize_specific(self):
+        pass
+
+    def add_ir_module(self, mod):
+        self._module = mod
+        pass
+
+    def add_linking_library(self, library):
+        pass
+
+    def finalize(self):
         pass
 
     def get_asm_str(self):
@@ -23,6 +38,14 @@ class HSACodeLibrary(CodeLibrary):
         m.load_llvm(str(self._final_module))
         out = m.finalize()
         return str(out.hsail)
+
+    def get_function(self, name):
+        for fn in self._module.functions:
+            if fn.name == name:
+                return fn
+
+    def get_llvm_str(self):
+        return "\nTBD\n"
 
 
 class JITHSACodegen(Codegen):
