@@ -7,7 +7,7 @@ from llvmlite import ir
 from numba import roc
 from numba.core.imputils import Registry
 from numba.core import types, cgutils
-from numba.core.itanium_mangler import mangle_c, mangle, mangle_type
+from numba.core.itanium_mangler import mangle, mangle_type
 from numba.core.typing.npydecl import parse_dtype
 from numba.roc import target
 from numba.roc import stubs
@@ -23,7 +23,7 @@ _void_value = ir.Constant(ir.PointerType(ir.IntType(8)), None)
 
 
 def _declare_function(context, builder, name, sig, cargs,
-                      mangler=mangle_c):
+                      mangler=mangle):
     """Insert declaration for a opencl builtin function.
     Uses the Itanium mangler.
 
