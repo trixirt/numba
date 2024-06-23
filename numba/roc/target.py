@@ -144,10 +144,10 @@ class HSATargetContext(BaseContext):
                                [self.call_conv.get_return_type(
                                    types.pyobject)] + argtys)
 
-        func = wrapper_module.add_function(fnty, name=func.name)
+        func = ir.Function(wrapper_module, fnty, func.name)
         func.calling_convention = CC_SPIR_FUNC
 
-        wrapper = wrapper_module.add_function(wrapperfnty, name=wrappername)
+        wrapper = ir.Function(wrapper_module, wrapperfnty, wrappername)
 
         builder = ir.IRBuilder(wrapper.append_basic_block(''))
 
