@@ -265,7 +265,7 @@ def gen_arg_addrspace_md(fn):
             codes.append(SPIR_PRIVATE_ADDRSPACE)
 
     consts = [ir.Constant(ir.IntType(32), x) for x in codes]
-    name = ir.MetaDataString.get(mod, "kernel_arg_addr_space")
+    name = ir.MetaDataString(mod, "kernel_arg_addr_space")
     return mod.add_metadata([name] + consts)
 
 
@@ -274,8 +274,8 @@ def gen_arg_access_qual_md(fn):
     Generate kernel_arg_access_qual metadata
     """
     mod = fn.module
-    consts = [ir.MetaDataString.get(mod, "none")] * len(fn.args)
-    name = ir.MetaDataString.get(mod, "kernel_arg_access_qual")
+    consts = [ir.MetaDataString(mod, "none")] * len(fn.args)
+    name = ir.MetaDataString(mod, "kernel_arg_access_qual")
     return mod.add_metadata([name] + consts)
 
 
@@ -285,8 +285,8 @@ def gen_arg_type(fn):
     """
     mod = fn.module
     fnty = fn.type.pointee
-    consts = [ir.MetaDataString.get(mod, str(a)) for a in fnty.args]
-    name = ir.MetaDataString.get(mod, "kernel_arg_type")
+    consts = [ir.MetaDataString(mod, str(a)) for a in fnty.args]
+    name = ir.MetaDataString(mod, "kernel_arg_type")
     return mod.add_metadata([name] + consts)
 
 
@@ -296,8 +296,8 @@ def gen_arg_type_qual(fn):
     """
     mod = fn.module
     fnty = fn.type.pointee
-    consts = [ir.MetaDataString.get(mod, "") for _ in fnty.args]
-    name = ir.MetaDataString.get(mod, "kernel_arg_type_qual")
+    consts = [ir.MetaDataString(mod, "") for _ in fnty.args]
+    name = ir.MetaDataString(mod, "kernel_arg_type_qual")
     return mod.add_metadata([name] + consts)
 
 
@@ -307,8 +307,8 @@ def gen_arg_base_type(fn):
     """
     mod = fn.module
     fnty = fn.type.pointee
-    consts = [ir.MetaDataString.get(mod, str(a)) for a in fnty.args]
-    name = ir.MetaDataString.get(mod, "kernel_arg_base_type")
+    consts = [ir.MetaDataString(mod, str(a)) for a in fnty.args]
+    name = ir.MetaDataString(mod, "kernel_arg_base_type")
     return mod.add_metadata([name] + consts)
 
 
