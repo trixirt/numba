@@ -140,7 +140,7 @@ class HSATargetContext(BaseContext):
         wrappername = 'hsaPy_{name}'.format(name=func.name)
 
         argtys = list(arginfo.argument_types)
-        fnty = ir.FunctionType(ir.IntType(),
+        fnty = ir.FunctionType(ir.IntType(32),
                                [self.call_conv.get_return_type(
                                    types.pyobject)] + argtys)
 
@@ -226,7 +226,7 @@ def set_hsa_kernel(fn):
                                           gen_arg_base_type(fn)]))
 
     # SPIR version 2.0
-    make_constant = lambda x: ir.Constant.int(ir.IntType(), x)
+    make_constant = lambda x: ir.Constant.int(ir.IntType(32), x)
     spir_version_constant = [make_constant(x) for x in SPIR_VERSION]
 
     spir_version = cgutils.get_or_insert_named_metadata(mod, "opencl.spir.version")
@@ -264,7 +264,7 @@ def gen_arg_addrspace_md(fn):
         else:
             codes.append(SPIR_PRIVATE_ADDRSPACE)
 
-    consts = [ir.Constant.int(ir.IntType(), x) for x in codes]
+    consts = [ir.Constant.int(ir.IntType(32), x) for x in codes]
     name = ir.MetaDataString.get(mod, "kernel_arg_addr_space")
     return mod.add_metadata([name] + consts)
 
